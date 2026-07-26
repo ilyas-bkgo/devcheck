@@ -1,0 +1,24 @@
+tools:
+  - name: Neovim
+    cmd: nvim
+    flag: --version
+  - name: Git
+    cmd: git
+    flag: --version
+  - name: Docker
+    cmd: docker
+    flag: --version
+  - name: Ripgrep
+    cmd: rg
+    flag: --version
+  - name: Tmux
+    cmd: tmux
+    flag: -V
+
+paths:
+  - name: Neovim Init
+    path: ~/.config/nvim/init.lua
+  - name: Tmux Config
+    path: ~/.config/tmux/tmux.conf
+  - name: SSH Key Dir
+    path: ~/.ssh
