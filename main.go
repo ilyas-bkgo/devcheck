@@ -12,6 +12,39 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const defaultConfig = `# devcheck configuration
+tools:
+  - name: Git
+    cmd: git
+    flag: --version
+  - name: Neovim
+    cmd: nvim
+    flag: --version
+  - name: Docker
+    cmd: docker
+    flag: --version
+
+paths:
+  - name: SSH Key Dir
+    path: ~/.ssh
+`
+
+func initConfigFile() {
+	target := "devcheck.yaml"
+	if _, err := os.Stat(target); err == nil {
+		fmt.Printf("%s already exists!\n", target)
+		return
+	}
+
+	err := os.WriteFile(target, []byte(defaultConfig), 0644)
+	if err != nil {
+		fmt.Printf("Failed to create %s: %v\n", target, err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Created starter config at ./%s! Run 'devcheck' to test it. \n", target)
+}
+
 type ToolCheck struct {
 	Name    string `yaml:"name"`
 	Command string `yaml:"cmd"`
@@ -77,6 +110,12 @@ func resolveConfigPath(customPath string) string {
 }
 
 func main() {
+
+	if len(os.Args) > 1 && os.Args[1] == "init" {
+		initConfigFile()
+		return
+	}
+
 	var configPath string
 	var jsonOutput bool
 
