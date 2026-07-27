@@ -4,27 +4,28 @@
 [![Latest Release](https://img.shields.io/github/v/release/ilyas-bkgo/devcheck?style=flat-square)](https://github.com/ilyas-bkgo/devcheck/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> A fast, zero-dependency CLI environment health checker written in Go.
+> A fast, concurrent, zero-dependency CLI environment health checker written in Go.
 
-`devcheck` reads a simple YAML configuration manifest to verify that your required CLI tools are installed on your `$PATH`, extracts their version numbers, and confirms that vital files and directories exist.
+`devcheck` reads a simple YAML configuration manifest to verify CLI binaries on your `$PATH`, inspect environment variables, and validate file/directory paths.
 
 ---
 
 ## 💡 Key Features
 
-- **⚡ Zero Runtime Dependencies:** Single static binary that executes instantly.
-- **🛠️ CLI Diagnostics:** Verifies tool availability on `$PATH` and captures version strings.
-- **📁 Path Validation:** Confirms existence of files and directories (with full `~` tilde home path expansion).
+- **⚡ Fast & Concurrent:** Uses goroutines to run all checks in parallel, providing near-instant results.
+- **⚡ Zero Runtime Dependencies:** Single static binary.
+- **🛠️ CLI Diagnostics:** Verifies tool availability on `$PATH`, supports regex-matching on version outputs, and respects execution timeouts.
+- **📁 Path & Env Validation:** Confirms existence of files/directories (with home directory `~` expansion) and verifies exported environment variables.
 - **⚙️ Auto-Initialization:** Run `devcheck init` to generate a sensible starter configuration in seconds.
-- **🤖 Script & CI Friendly:** Includes structured JSON output (`--json` / `-j`) and returns non-zero exit codes (`1`) on check failures for dotfile installation scripts.
+- **🤖 Script & CI Friendly:** Supports structured JSON output (`--json`), quiet mode (`--quiet`), and returns non-zero exit code `1` on check failures.
 
 ---
 
 ## 📦 Installation
 
-### Shell Installer (Linux & macOS)
+### Shell Installer (Linux & macOS / WSL)
 
-Install the latest pre-compiled binary instantly, no Go required:
+Install the latest pre-compiled binary instantly:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ilyas-bkgo/devcheck/main/install.sh | sh
@@ -32,15 +33,10 @@ curl -fsSL https://raw.githubusercontent.com/ilyas-bkgo/devcheck/main/install.sh
 
 ### Via `go install`
 
-Requires Go 1.20+:
+Requires Go 1.25+:
 
 ```bash
 go install github.com/ilyas-bkgo/devcheck@latest
-```
-
-Note: Ensure `$HOME/go/bin` is in your system `$PATH`:
-
-```bash
 export PATH=$PATH:$HOME/go/bin
 ```
 
@@ -57,51 +53,38 @@ sudo mv devcheck /usr/local/bin/
 
 ## 🚀 Quick Start
 
-Initialize a starter configuration:
+1. **Initialize a starter configuration:**
+   ```bash
+   devcheck init
+   ```
+   This creates a `devcheck.yaml` file in your current working directory.
 
-```bash
-devcheck init
-```
-
-This creates a `devcheck.yaml` file in your current working directory.
-
-Run your environment health check:
-
-```bash
-devcheck
-```
+2. **Run your environment health check:**
+   ```bash
+   devcheck
+   ```
 
 ---
 
 ## ⚙️ Configuration (`devcheck.yaml`)
 
-Define your development tools and file paths inside `devcheck.yaml` (or `~/.config/devcheck/config.yaml`):
+Define your development tools, environment variables, and paths inside `devcheck.yaml` (or `~/.config/devcheck/config.yaml`):
 
 ```yaml
 tools:
-  - name: Neovim
-    cmd: nvim
-    flag: --version
-  - name: Git
-    cmd: git
-    flag: --version
-  - name: Docker
-    cmd: docker
-    flag: --version
-  - name: Ripgrep
-    cmd: rg
-    flag: --version
-  - name: Tmux
-    cmd: tmux
-    flag: -V
+  - name: Go Compiler
+    cmd: go
+    flag: version
+    pattern: 'go1\.(2[2-9]|[3-9][0-9])'
 
 paths:
   - name: SSH Key Dir
     path: ~/.ssh
-  - name: Neovim Config
-    path: ~/.config/nvim/init.lua
-  - name: Tmux Config
-    path: ~/.config/tmux/tmux.conf
+
+env:
+  - name: Default Editor
+    var: EDITOR
+    pattern: 'nvim|vim'
 ```
 
 ---
@@ -109,42 +92,27 @@ paths:
 ## 📖 CLI Usage & Flags
 
 ```bash
-devcheck [command] [flags]
+devcheck [flags]
 ```
 
-### Commands
-
-| Command | Description |
-|---|---|
-| `init` | Creates a starter `devcheck.yaml` configuration in the current directory |
-
-### Flags
-
 | Flag | Shorthand | Description | Default |
-|---|---|---|---|
+| :--- | :--- | :--- | :--- |
 | `--config` | `-c` | Path to custom config file | `devcheck.yaml` |
 | `--json` | `-j` | Output results in JSON format | `false` |
+| `--quiet` | `-q` | Only print failing checks | `false` |
 | `--help` | `-h` | Display help menu | — |
 
 ### Examples
 
-Run with a custom config path:
-
-```bash
-devcheck -c ~/.dotfiles/devcheck.yaml
-```
-
-Pipe JSON output to `jq`:
-
+**Pipe JSON output to `jq`:**
 ```bash
 devcheck --json | jq '.results[] | select(.passed == false)'
 ```
 
-Use in dotfiles bootstrap scripts:
-
+**Use in dotfiles bootstrap scripts:**
 ```bash
 if ! devcheck; then
-  echo "Environment health check failed. Please fix missing dependencies."
+  echo "Environment health check failed."
   exit 1
 fi
 ```
@@ -152,5 +120,4 @@ fi
 ---
 
 ## 📄 License
-
 MIT License © Ilyas

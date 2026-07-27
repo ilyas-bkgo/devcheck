@@ -1,16 +1,30 @@
 tools:
+  - name: Go Compiler
+    cmd: go
+    flag: version
+    pattern: 'go1\.(2[2-9]|[3-9][0-9])'
+
+  - name: Node.js
+    cmd: node
+    flag: --version
+    pattern: '^v2[0-9]\.'
+
   - name: Neovim
     cmd: nvim
     flag: --version
+
   - name: Git
     cmd: git
     flag: --version
+
   - name: Docker
     cmd: docker
     flag: --version
+
   - name: Ripgrep
     cmd: rg
     flag: --version
+
   - name: Tmux
     cmd: tmux
     flag: -V
@@ -18,7 +32,20 @@ tools:
 paths:
   - name: Neovim Init
     path: ~/.config/nvim/init.lua
+
   - name: Tmux Config
     path: ~/.config/tmux/tmux.conf
+    fix: "mkdir -p ~/.config/tmux && touch ~/.config/tmux/tmux.conf"
+
   - name: SSH Key Dir
     path: ~/.ssh
+
+env:
+  - name: Default Editor
+    var: EDITOR
+    pattern: 'nvim|vim|nano|emacs'
+    fix: "echo 'export EDITOR=nvim' >> ~/.bashrc"
+
+  - name: User Shell
+    var: SHELL
+    pattern: 'zsh|bash'
