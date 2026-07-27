@@ -1,25 +1,41 @@
 # devcheck
 
-A fast, zero-dependency CLI tool to validate your local development environment and dotfiles.
+[![Go Version](https://img.shields.io/github/go-mod/go-version/ilyas-bkgo/devcheck?style=flat-square)](https://golang.org)
+[![Latest Release](https://img.shields.io/github/v/tag/ilyas-bkgo/devcheck?label=release&style=flat-square)](https://github.com/ilyas-bkgo/devcheck/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-`devcheck` reads a `devcheck.yaml` manifest to verify that required CLI tools are installed on your `$PATH`, grabs their versions, and checks that essential files or directories exist on your machine.
+> A fast, zero-dependency CLI environment health checker written in Go.
 
-## Features
+`devcheck` reads a simple YAML configuration manifest to verify that your required CLI tools are installed on your `$PATH`, extracts their version numbers, and confirms that vital files and directories exist.
 
-- **Zero Runtime Dependencies:** Single binary that starts instantly.
-- **CLI Diagnostics:** Checks binary presence and extracts version strings.
-- **Path Checks:** Verifies files/folders exist (with automatic `~` home directory expansion).
-- **Scripting Friendly:** Includes `-j` / `--json` output and exits with status code `1` on failure.
-- **Flexible Config:** Automatically reads `./devcheck.yaml` or `~/.config/devcheck/config.yaml`.
+---
 
-## Quick Start
+## 💡 Key Features
 
-### 1. Create a `devcheck.yaml`
+- **⚡ Zero Runtime Dependencies:** Single binary that executes instantly.
+- **🛠️ CLI Diagnostics:** Verifies tool availability on `$PATH` and captures version strings.
+- **📁 Path Validation:** Confirms existence of files and directories (with full `~` tilde home path expansion).
+- **⚙️ Auto-Initialization:** Run `devcheck init` to generate a sensible starter configuration in seconds.
+- **🤖 Script & CI Friendly:** Includes structured JSON output (`--json` / `-j`) and returns non-zero exit codes (`1`) on check failures for dotfile installation scripts.
 
-Place a `devcheck.yaml` in your current directory or in `~/.config/devcheck/config.yaml`:
+---
 
-```yaml
-tools:
+## 📦 Installation
+
+### Via `go install` (Recommended)
+
+Requires Go 1.20+:
+
+```bash
+go install [github.com/ilyas-bkgo/devcheck@latest](https://github.com/ilyas-bkgo/devcheck@latest)
+Note: Ensure $HOME/go/bin is in your system $PATH:Bashexport PATH=$PATH:$HOME/go/bin
+From SourceBashgit clone [https://github.com/ilyas-bkgo/devcheck.git](https://github.com/ilyas-bkgo/devcheck.git)
+cd devcheck
+go build -o devcheck .
+sudo mv devcheck /usr/local/bin/
+🚀 Quick StartInitialize a starter configuration:Bashdevcheck init
+This creates a devcheck.yaml file in your current directory.Run your environment health check:Bashdevcheck
+⚙️ Configuration (devcheck.yaml)Define your development tools and file paths inside devcheck.yaml (or ~/.config/devcheck/config.yaml):YAMLtools:
   - name: Neovim
     cmd: nvim
     flag: --version
@@ -37,9 +53,17 @@ tools:
     flag: -V
 
 paths:
-  - name: Neovim Init
+  - name: SSH Key Dir
+    path: ~/.ssh
+  - name: Neovim Config
     path: ~/.config/nvim/init.lua
   - name: Tmux Config
     path: ~/.config/tmux/tmux.conf
-  - name: SSH Directory
-    path: ~/.ssh
+📖 CLI Usage & FlagsBashdevcheck [flags]
+FlagShorthandDescriptionDefault--config-cSpecify custom path to config filedevcheck.yaml--json-jOutput health results in JSON formatfalse--help-hDisplay help menu—ExamplesRun with a custom config path:Bashdevcheck -c ~/.dotfiles/devcheck.yaml
+Pipe JSON output to jq:Bashdevcheck --json | jq '.results[] | select(.passed == false)'
+Use in dotfiles bootstrap scripts (install.sh):Bashif ! devcheck; then
+  echo "Environment health check failed. Please fix missing dependencies."
+  exit 1
+fi
+📄 LicenseMIT License © Ilyas
