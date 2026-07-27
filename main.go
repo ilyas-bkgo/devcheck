@@ -70,7 +70,7 @@ type CheckResult struct {
 
 type Report struct {
 	Success bool          `json:"success"`
-	Results []CheckResult `json:"result"`
+	Results []CheckResult `json:"results"`
 }
 
 // Handles bare "~" as well as "~/"
