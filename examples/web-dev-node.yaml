@@ -1,0 +1,19 @@
+# Node.js web development environment
+tools:
+  - name: Node.js
+    cmd: node
+    flag: --version
+
+  - name: pnpm
+    cmd: pnpm
+    flag: --version
+
+  - name: Docker
+    cmd: docker
+    flag: --version
+
+services:
+  - name: PostgreSQL
+    host: 127.0.0.1
+    port: 5432
+    timeout: 2s

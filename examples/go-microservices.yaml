@@ -1,0 +1,25 @@
+# Go microservices development environment
+tools:
+  - name: Go
+    cmd: go
+    flag: version
+    pattern: 'go1\.25\.'
+
+  - name: Protocol Buffers compiler
+    cmd: protoc
+    flag: --version
+
+  - name: golangci-lint
+    cmd: golangci-lint
+    flag: --version
+
+  - name: Docker
+    cmd: docker
+    flag: --version
+
+services:
+  - name: Local API
+    # Adjust the endpoint to match your service.
+    url: http://127.0.0.1:8080/health
+    expected_status: 200
+    timeout: 3s

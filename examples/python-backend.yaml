@@ -1,0 +1,20 @@
+# Python backend development environment
+tools:
+  - name: Python
+    cmd: python3
+    flag: --version
+
+  - name: Poetry
+    cmd: poetry
+    flag: --version
+
+  - name: Redis
+    cmd: redis-server
+    flag: --version
+
+services:
+  - name: Local API
+    # Adjust the endpoint to match your application.
+    url: http://127.0.0.1:8000/health
+    expected_status: 200
+    timeout: 3s

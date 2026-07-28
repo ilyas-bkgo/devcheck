@@ -5,7 +5,10 @@ before:
     - go mod tidy
 
 builds:
-  - env:
+  - main: ./cmd/devcheck
+    ldflags:
+      - -s -w -X github.com/ilyas-bkgo/devcheck/internal/version.Version={{ .Version }} -X github.com/ilyas-bkgo/devcheck/internal/version.Commit={{ .Commit }} -X github.com/ilyas-bkgo/devcheck/internal/version.Date={{ .Date }}
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
