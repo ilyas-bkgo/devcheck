@@ -12,6 +12,9 @@ import (
 )
 
 func TestLoadRemoteConfig(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	// Create a temp local file for the merged content
 	tmpFile, err := os.CreateTemp("", "local.yaml")
 	if err != nil {
@@ -49,6 +52,9 @@ func TestLoadRemoteConfig(t *testing.T) {
 }
 
 func TestRemoteFetchErrors(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
@@ -64,6 +70,9 @@ func TestRemoteFetchErrors(t *testing.T) {
 }
 
 func TestRemoteFetchTimeout(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	orig := fetchTimeout
 	fetchTimeout = 50 * time.Millisecond
 	defer func() { fetchTimeout = orig }()
@@ -81,6 +90,9 @@ func TestRemoteFetchTimeout(t *testing.T) {
 }
 
 func TestRemoteFetchMaxSize(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	largeData := make([]byte, maxResponseSize+100)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(largeData)
@@ -94,6 +106,9 @@ func TestRemoteFetchMaxSize(t *testing.T) {
 }
 
 func TestRemoteCycleDetection(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	var ts *httptest.Server
 	requests := make(map[string]int)
 	ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +135,9 @@ func TestRemoteCycleDetection(t *testing.T) {
 }
 
 func TestRemoteRelativeIncludeRejection(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("include:\n  - ./some-local-file.yaml"))
 	}))
@@ -134,6 +152,9 @@ func TestRemoteRelativeIncludeRejection(t *testing.T) {
 }
 
 func TestRemoteDisallowedRedirect(t *testing.T) {
+	bypassSSRF = true
+	defer func() { bypassSSRF = false }()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Location", "ftp://malicious.com/config.yaml")
 		w.WriteHeader(http.StatusFound)

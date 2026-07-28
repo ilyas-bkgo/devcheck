@@ -6,7 +6,7 @@
 
 > A fast, concurrent, zero-dependency CLI environment health checker written in Go.
 
-Current release: `v0.1.3` · Requires Go `1.25.0`
+Current release: `v0.2.0` · Requires Go `1.25.0`
 
 `devcheck` reads a simple YAML configuration manifest to verify CLI binaries on your `$PATH`, inspect environment variables, validate file/directory paths, and check TCP or HTTP services.
 
@@ -43,7 +43,7 @@ curl -fsSL https://raw.githubusercontent.com/ilyas-bkgo/devcheck/main/install.sh
 Requires Go 1.25.0:
 
 ```bash
-go install github.com/ilyas-bkgo/devcheck@v0.1.3
+go install github.com/ilyas-bkgo/devcheck@v0.2.0
 export PATH=$PATH:$HOME/go/bin
 ```
 
@@ -143,19 +143,21 @@ tools:
     args: ["config", "get", "registry"]
 ```
 
-## 🏢 Team configuration
-
-Keep a shared baseline and extend it for each repository or role:
-
-```yaml
-# devcheck.yaml
-include:
-  - .devcheck/team-baseline.yaml
-
-tools:
-  - name: pnpm
-    cmd: pnpm
-    flag: --version
+	## 🏢 Team configuration
+	
+	Keep a shared baseline and extend it for each repository or role. You can use local paths or remote URLs:
+	
+	```yaml
+	# devcheck.yaml
+	include:
+	  - https://raw.githubusercontent.com/ilyas-bkgo/devcheck-standards/main/baseline-common.yaml
+	  - .devcheck/team-secrets.yaml
+	
+	tools:
+	  - name: pnpm
+	    cmd: pnpm
+	    flag: --version
+	```
 
 profiles:
   frontend:
