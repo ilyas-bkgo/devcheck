@@ -292,20 +292,40 @@ func LoadProfile(path, profile string) (Config, error) {
 }
 
 func load(path, profile string, visiting map[string]bool) (Config, error) {
-	absPath, err := filepath.Abs(ExpandPath(path))
-	if err != nil {
-		return Config{}, err
+	isURL := strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://")
+	var absPath string
+
+	if isURL {
+		absPath = path
+	} else {
+		var err error
+		absPath, err = filepath.Abs(ExpandPath(path))
+		if err != nil {
+			return Config{}, err
+		}
 	}
+
 	if visiting[absPath] {
 		return Config{}, fmt.Errorf("configuration include cycle: %s", absPath)
 	}
 	visiting[absPath] = true
 	defer delete(visiting, absPath)
 
-	data, err := os.ReadFile(absPath)
-	if err != nil {
-		return Config{}, err
+	var data []byte
+	if isURL {
+		var err error
+		data, err = fetchRemoteYAML(path)
+		if err != nil {
+			return Config{}, err
+		}
+	} else {
+		var err error
+		data, err = os.ReadFile(absPath)
+		if err != nil {
+			return Config{}, err
+		}
 	}
+
 	var current Config
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	decoder.KnownFields(true)
@@ -315,10 +335,21 @@ func load(path, profile string, visiting map[string]bool) (Config, error) {
 
 	merged := Config{}
 	for _, include := range current.Include {
-		includePath := ExpandPath(include)
-		if !filepath.IsAbs(includePath) {
-			includePath = filepath.Join(filepath.Dir(absPath), includePath)
+		// Determine if this specific include is a URL
+		isIncludeURL := strings.HasPrefix(include, "http://") || strings.HasPrefix(include, "https://")
+
+		if isURL && !isIncludeURL {
+			return Config{}, fmt.Errorf("relative include %q in remote config %q is not allowed; please use absolute URL", include, path)
 		}
+
+		includePath := include
+		if !isIncludeURL {
+			includePath = ExpandPath(include)
+			if !filepath.IsAbs(includePath) {
+				includePath = filepath.Join(filepath.Dir(absPath), includePath)
+			}
+		}
+
 		included, err := load(includePath, "", visiting)
 		if err != nil {
 			return Config{}, fmt.Errorf("include %q: %w", include, err)
